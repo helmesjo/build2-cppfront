@@ -1,0 +1,7 @@
+project = cppfront
+
+using version
+using config
+using test
+using install
+using dist

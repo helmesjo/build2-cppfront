@@ -1,0 +1,35 @@
+intf_libs = # Interface dependencies.
+impl_libs = # Implementation dependencies.
+#import xxxx_libs += libhello%lib{hello}
+
+lib{cpp2}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+
+# Build options.
+#
+cxx.poptions =+ "-I$out_root" "-I$src_root"
+
+# Export options.
+#
+lib{cpp2}:
+{
+  cxx.export.poptions = "-I$out_base" "-I$src_base"
+  cxx.export.libs = $intf_libs
+}
+
+# For pre-releases use the complete version to make sure they cannot
+# be used in place of another pre-release or the final version. See
+# the version module for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{cpp2}: bin.lib.version = "-$version.project_id"
+else
+  lib{cpp2}: bin.lib.version = "-$version.major.$version.minor"
+
+# Install into the libcpp2/ subdirectory of, say, /usr/include/
+# recreating subdirectories.
+#
+{hxx ixx txx}{*}:
+{
+  install         = include/libcpp2/
+  install.subdirs = true
+}

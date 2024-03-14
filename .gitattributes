@@ -17,3 +17,6 @@
 # Use `binary` to make sure certain files are never auto-detected as text.
 #
 #*.png binary
+
+cppfront/cppfront/include symlink=dir
+cppfront/cppfront/source symlink=dir

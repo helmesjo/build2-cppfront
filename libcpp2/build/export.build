@@ -1,0 +1,6 @@
+$out_root/
+{
+  include libcpp2/
+}
+
+export $out_root/libcpp2/$import.target

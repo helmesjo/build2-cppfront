@@ -45,8 +45,6 @@ for t: regression-tests/cpp2{pure2-* -gcc* -clang* -apple* -msvc*}
   testscript{$n}: test = false
 }
 
-# cxx.poptions =+ "-I$out_root" "-I$src_root"
-
 # Note also that this rule has no problem compiling multiple .thrift files
 # into the same gen-cpp/ subdirectory provided they don't clobber each other's
 # generated files.

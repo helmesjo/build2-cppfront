@@ -16,6 +16,11 @@ lib{cpp2}:
   cxx.export.libs = $intf_libs
 }
 
+if ($cxx.target.system != 'win32-msvc')
+{
+  lib{cpp2}: cxx.export.libs += -pthread
+}
+
 # For pre-releases use the complete version to make sure they cannot
 # be used in place of another pre-release or the final version. See
 # the version module for details on the version.* variable values.

@@ -1,0 +1,6 @@
+$out_root/
+{
+  include cppfront/
+}
+
+export $out_root/cppfront/$import.target

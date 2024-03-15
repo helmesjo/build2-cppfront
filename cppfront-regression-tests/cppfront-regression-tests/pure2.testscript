@@ -5,6 +5,8 @@
   cpp2_in = $path($cpp2_in)
   expected_stdout = $path($expected_stdout)
   expected_cpp_out = $path($expected_cpp_out)
+  lib_poptions =
+  # lib_libs =
 
   d = $directory($cpp2_in)
 
@@ -16,19 +18,17 @@
     $cpp2_in \
     | $filter >?$expected_stdout
 
-  # lib_poptions = $cxx.lib_poptions(libue{cpp2-meta}, obje)
-  # lib_libs = $cxx.lib_libs(libue{cpp2-meta}, obje)
   # fails to append imported include dirs from lib{cpp2}
   $effect($cxx.path) \
     $cxx.poptions \
     $cc.poptions \
-    $cxx.lib_poptions(libue{cpp2-meta}, obje) \
+    $lib_poptions \
     $cc.coptions \
     $cxx.coptions \
     $cc.loptions \
     $cxx.loptions \
     $cxx.mode \
     $expected_cpp_out \
-    $cxx.lib_libs(libue{cpp2-meta}, obje) \
-    $cc.libs
+    $lib_libs \
+    $cc.libs >| &$~/***
 }

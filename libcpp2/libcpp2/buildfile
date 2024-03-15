@@ -6,13 +6,13 @@ lib{cpp2}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
 
 # Build options.
 #
-cxx.poptions =+ "-I$out_root" "-I$src_root"
+cxx.poptions =+ "-I$src_root"
 
 # Export options.
 #
 lib{cpp2}:
 {
-  cxx.export.poptions = "-I$out_base" "-I$src_base"
+  cxx.export.poptions = "-I$path.posix_representation($src_base)"
   cxx.export.libs = $intf_libs
 }
 

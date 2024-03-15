@@ -1,0 +1,34 @@
+: test pure cpp2
+:
+{
+  cppfront = $path($cppfront)
+  cpp2_in = $path($cpp2_in)
+  expected_stdout = $path($expected_stdout)
+  expected_cpp_out = $path($expected_cpp_out)
+
+  d = $directory($cpp2_in)
+
+  # cppfront prints full path, but test expects only <filename>.cpp2
+  filter = [cmdline] sed -e \'"s|^.*\($path.leaf($cpp2_in)\)|\1|"\'
+
+  $cppfront \
+    -p \
+    $cpp2_in \
+    | $filter >?$expected_stdout
+
+  # lib_poptions = $cxx.lib_poptions(libue{cpp2-meta}, obje)
+  # lib_libs = $cxx.lib_libs(libue{cpp2-meta}, obje)
+  # fails to append imported include dirs from lib{cpp2}
+  $effect($cxx.path) \
+    $cxx.poptions \
+    $cc.poptions \
+    $cxx.lib_poptions(libue{cpp2-meta}, obje) \
+    $cc.coptions \
+    $cxx.coptions \
+    $cc.loptions \
+    $cxx.loptions \
+    $cxx.mode \
+    $expected_cpp_out \
+    $cxx.lib_libs(libue{cpp2-meta}, obje) \
+    $cc.libs
+}

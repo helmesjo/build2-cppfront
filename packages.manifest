@@ -3,3 +3,6 @@ location: cppfront/
 
 :
 location: libcpp2/
+
+:
+location: cppfront-regression-tests/

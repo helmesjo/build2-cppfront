@@ -1,25 +1,37 @@
-: test pure cpp2
-:
-{
-  cppfront = $path($cppfront)
-  cpp2_in = $path($cpp2_in)
-  expected_stdout = $path($expected_stdout)
-  expected_cpp_out = $path($expected_cpp_out)
-  lib_poptions =
-  # lib_libs =
+cppfront = $path($cppfront)
+cpp2_in = $path($cpp2_in)
+name = $name($cpp2_in)
 
-  d = $directory($cpp2_in)
+# if there is an expected output file,
+# then it's expected to succeed & build.
+# regression-tests/test-results/pure2-enum.cpp2.output
+res_dir = [dir_path] $directory($cpp2_in)/test-results/
+expect_success = \
+  [bool] (!$empty($filesystem.path_search($(name).cpp, $res_dir)))
+
+: pure cpp2 - expects success
+:
+if $expect_success
+{
+  stdout  = "$res_dir/$path.leaf($cpp2_in).output"
+  cpp_out = "$(name).cpp"
+
+  # GENERATED: Don't touch these line.
+  lib_poptions =
+  lib_libs =
+  # GENERATED: Don't touch these line.
 
   # cppfront prints full path, but test expects only <filename>.cpp2
   filter = [cmdline] sed -e \'"s|^.*\($path.leaf($cpp2_in)\)|\1|"\'
 
-  $cppfront \
+  +$cppfront \
     -p \
     $cpp2_in \
-    | $filter >?$expected_stdout
+    -output $cpp_out \
+    &?$~/* \
+    | $filter >?$stdout
 
-  # fails to append imported include dirs from lib{cpp2}
-  $effect($cxx.path) \
+  +$effect($cxx.path) \
     $cxx.poptions \
     $cc.poptions \
     $lib_poptions \
@@ -28,7 +40,23 @@
     $cc.loptions \
     $cxx.loptions \
     $cxx.mode \
-    $expected_cpp_out \
+    $~/$cpp_out \
     $lib_libs \
-    $cc.libs >| &$~/***
+    $cc.libs \
+    &?$~/* \
+    >|
+}
+else
+{
+  stdout  = "$res_dir/$path.leaf($cpp2_in).output"
+
+  # cppfront prints full path, but test expects only <filename>.cpp2
+  filter = [cmdline] sed -e \'"s|^.*\($path.leaf($cpp2_in)\)|\1|"\'
+
+  $cppfront \
+    -p \
+    $cpp2_in \
+    -output $cpp_out \
+    &?$~/* \
+    | $filter >?$stdout
 }

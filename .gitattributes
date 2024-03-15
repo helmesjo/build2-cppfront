@@ -20,3 +20,5 @@
 
 cppfront/cppfront/include symlink=dir
 cppfront/cppfront/source symlink=dir
+
+cppfront-regression-tests/cppfront-regression-tests/regression-tests symlink=dir

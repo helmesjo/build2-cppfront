@@ -17,14 +17,14 @@ cppfront_stdout{*.cpp2}: extension = output
 
 ./: libue{cpp2-meta}: $libs
 
-for t: regression-tests/cpp2{pure2-hello}
+for t: regression-tests/cpp2{pure2-hello} regression-tests/cpp2{pure2-print}
 {
   n = $name($t)
   d = $directory($t)
 
   expected_stdout  = $d/test-results/cppfront_stdout{$(n).cpp2.output}
   expected_cpp_out = $d/test-results/cpp2_out{$n}
-  ./: alias{$n}: $t $expected_stdout $expected_cpp_out testscript $cppfront
+  ./: alias{$n}: $t $expected_stdout $expected_cpp_out testscript{$n} $cppfront
   {
     cppfront = $cppfront
     cpp2_in = $t
@@ -33,7 +33,7 @@ for t: regression-tests/cpp2{pure2-hello}
     expected_exit = 0
   }
 
-  testscript{$n}: testscript{pure2}@./ libue{cpp2-meta}
+  testscript{$n}: testscript{pure2} libue{cpp2-meta}
   {{
     in = $path($<[0])
     out = $path($>)
@@ -42,7 +42,7 @@ for t: regression-tests/cpp2{pure2-hello}
     depdb hash $lib_poptions
     depdb hash $lib_libs
 
-    diag $in $out
+    diag update ($<[0]) ($>)
     cp --no-cleanup $in $out
     sed -i -e "s|\(^.*lib_poptions =.*\$\)|\1 [strings] $regex.merge($lib_poptions, '\(.*\)', '\1', ' ')|" $out
     sed -i -e "s|\(^.*lib_libs =.*\$\)|\1 [strings] $regex.merge($lib_libs, '\(.*\)', '\1', ' ')|" $out

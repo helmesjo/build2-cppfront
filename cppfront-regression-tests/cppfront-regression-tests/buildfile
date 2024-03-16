@@ -45,6 +45,11 @@ for t: regression-tests/cpp2{pure2-* -gcc* -clang* -apple* -msvc*}
   testscript{$n}: test = false
 }
 
+if ($cxx.target.system == 'win32-msvc')
+{
+  cxx.coptions += -nologo -EHsc
+}
+
 # Note also that this rule has no problem compiling multiple .thrift files
 # into the same gen-cpp/ subdirectory provided they don't clobber each other's
 # generated files.

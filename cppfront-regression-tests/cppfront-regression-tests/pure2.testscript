@@ -1,36 +1,43 @@
-cppfront = $path($cppfront)
-cpp2_in = $path($cpp2_in)
+cppfront                 = $path($cppfront)
+cpp2_in                  = $path($cpp2_in)
+cpp2_in_filename         = $path.leaf($cpp2_in)
 
-res_dir = [dir_path] $directory($cpp2_in)/test-results
+results_dir              = [dir_path] $directory($cpp2_in)/test-results
+expected_cpp             = [path] $name($cpp2_in_filename).cpp
+expected_cppfront_output = [path] $path.leaf($cpp2_in).output
 
-: pure cpp2 - expects success
+# GENERATED: Don't touch these line, they're filled in by the buildfile.
+lib_poptions =
+lib_libs =
+# GENERATED: Don't touch these line, they're filled in by the buildfile.
+
+: Pure cpp2
+: cpp2 -> cpp1 -> exe
 :
-# if there is an expected output file, then
-# it's also expected to succeed & compile.
-if (!$empty($filesystem.path_search($name($cpp2_in).cpp, $res_dir)))
+: When there is an expected output file, then this test does the following:
+: 1.  Run cppfront with input .cpp2 file.
+: 2.  Verify cppfront output against expected.
+: 3.  If cppfront is expected to succeed, verify it compiles.
+if (!$empty($filesystem.path_search($expected_cpp, $results_dir)))
 {
-  stdout  = ./cppfront.stdout
-  cpp_out = ./generated.cpp
+  correct_output = correct.stdout
+  correct_cpp    = correct.cpp
+  generated_cpp  = generated.cpp
 
-  # GENERATED: Don't touch these line.
-  lib_poptions =
-  lib_libs =
-  # GENERATED: Don't touch these line.
-
-  # test expects original <filename>.cpp2 in cppfront stdout
-  cpp_in_name = $path.leaf($cpp2_in)
+  # test expects original <filename>.cpp2 in cppfront stdout,
+  # so we filter it before diffing.
   filter_cpp2 = \
-    [cmdline] sed -e \'"s|./in.cpp2|$cpp_in_name|"\'
+    [cmdline] sed -e \'"s|./in.cpp2|$cpp2_in_filename|"\'
   # see TODO below
   # filter_1cpp = \
-  #   [cmdline] sed -e \'"s|\./in.cpp2|$cpp_in_name|"\'
+  #   [cmdline] sed -e \'"s|\./in.cpp2|$cpp2_in_filename|"\'
   # filter_2cpp = \
   #   [cmdline] sed -e \'"s|CPP2_INCLUDE_STD         Yes|CPP2_IMPORT_STD          Yes|"\'
 
-  # create symlinks to avoid blowing up super long paths and lose poor little Windows.
+  # create symlinks to avoid blowing up super long paths, Windows will get lost. 🥲
   +ln --no-cleanup -s "$cpp2_in" ./in.cpp2
-  +ln --no-cleanup -s "$res_dir/$path.leaf($cpp2_in).output" $stdout
-  +ln --no-cleanup -s "$res_dir/$name($cpp2_in).cpp" $cpp_out
+  +ln --no-cleanup -s "$results_dir/$expected_cppfront_output" ./$correct_output
+  +ln --no-cleanup -s "$results_dir/$expected_cpp" ./$correct_cpp
 
   # generate cpp2 and compare stdout to expected
   # TODO: use -import-std.
@@ -38,15 +45,15 @@ if (!$empty($filesystem.path_search($name($cpp2_in).cpp, $res_dir)))
     -pure \
     -include-std \
     ./in.cpp2 \
-    -output ./out.cpp \
+    -output ./$generated_cpp \
     &?$~/*** \
-    | $filter_cpp2 >?$stdout
+    | $filter_cpp2 >?./$correct_output
 
   # TODO: uncomment when 'import std' is supported (and setup)
   #       and remove '-include-std'
   # +$filter_1cpp -i ./out.cpp
   # +$filter_2cpp -i ./out.cpp
-  # +diff -u $cpp_out ./out.cpp
+  # +diff -u ./$correct_cpp ./$generated_cpp
 
   # compile generate source
   +$effect($cxx.path) \
@@ -58,44 +65,39 @@ if (!$empty($filesystem.path_search($name($cpp2_in).cpp, $res_dir)))
     $cc.loptions \
     $cxx.loptions \
     $cxx.mode \
-    ./out.cpp \
+    ./$generated_cpp \
     $lib_libs \
     $cc.libs \
     &?$~/*** \
-    >-
+    >!
 }
-elif (!$empty($filesystem.path_search($res_dir/$path.leaf($cpp2_in).output, $res_dir)))
+elif (!$empty($filesystem.path_search($expected_cppfront_output, $results_dir)))
 {
-  stderr  = ./$name($cpp2_in).output
-
-  # GENERATED: Don't touch these line.
-  lib_poptions =
-  lib_libs =
-  # GENERATED: Don't touch these line.
+  cppfront_output  = cppfront.stdout
+  expected_output  = expected.stdout
 
   # test expects original <filename>.cpp2 in cppfront stdout + stderr
-  cpp_in_name = $path.leaf($cpp2_in)
   filter1_cpp2 = \
     [cmdline] sed -e \'"s|\./||"\'
   filter2_cpp2 = \
-    [cmdline] sed -e \'"s|in.cpp2|$cpp_in_name|"\'
+    [cmdline] sed -e \'"s|in.cpp2|$cpp2_in_filename|"\'
 
   # create symlinks to avoid blowing up super long paths and lose poor little Windows.
   +ln --no-cleanup -s "$cpp2_in" ./in.cpp2
-  +ln --no-cleanup -s "$res_dir/$path.leaf($cpp2_in).output" $stderr
+  +ln --no-cleanup -s "$results_dir/$expected_cppfront_output" ./$expected_output
 
-  # generate cpp2 and compare stdout to expected
+  # generate cpp2 and compare stdout+stderr to expected
   # TODO: use -import-std.
   +$cppfront \
     -pure \
     -include-std \
     ./in.cpp2 \
     &?$~/*** \
-    >&2 2>=./stderr.out != 0
+    2>&1 >=./$cppfront_output != 0
 
-  +$filter1_cpp2 -i ./stderr.out
-  +$filter2_cpp2 -i ./stderr.out
-  +diff -u $stderr ./stderr.out >!
+  +$filter1_cpp2 -i ./$cppfront_output
+  +$filter2_cpp2 -i ./$cppfront_output
+  +diff -u ./$expected_output ./$cppfront_output >!
 }
 else
 {

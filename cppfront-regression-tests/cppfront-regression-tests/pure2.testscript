@@ -6,10 +6,10 @@ results_dir              = [dir_path] $directory($cpp2_in)/test-results
 expected_cpp             = [path] $name($cpp2_in_filename).cpp
 expected_cppfront_output = [path] $path.leaf($cpp2_in).output
 
-# GENERATED: Don't touch these line, they're filled in by the buildfile.
+# GENERATED: Don't touch these lines, they're filled in by the buildfile.
 lib_poptions =
 lib_libs =
-# GENERATED: Don't touch these line, they're filled in by the buildfile.
+# GENERATED: Don't touch these lines, they're filled in by the buildfile.
 
 : Pure cpp2
 : cpp2 -> cpp1 -> exe

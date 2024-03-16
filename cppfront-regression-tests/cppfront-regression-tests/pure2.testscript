@@ -16,10 +16,10 @@ lib_libs =
 :   && diff ./expect.cpp ./gen.cpp
 :   && cxx ./gen.cpp1
 :
-: When there is an expected output file, then this test does the following:
+: When there is an expected .cpp file, this test does the following:
 : 1.  Run cppfront with input .cpp2 file.
-: 2.  Verify cppfront output against expected.
-: 3.  If cppfront is expected to succeed, verify it compiles.
+: 2.  Verify generated .cpp against expected.
+: 3.  If cppfront is expected to succeed, verify .cpp compiles.
 if (!$empty($filesystem.path_search($expected_cpp, $results_dir)))
 {
   correct_output = correct.stdout

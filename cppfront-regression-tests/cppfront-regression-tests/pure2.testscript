@@ -12,7 +12,9 @@ lib_libs =
 # GENERATED: Don't touch these lines, they're filled in by the buildfile.
 
 : Pure cpp2
-: cpp2 -> cpp1 -> exe
+: cppfront .cpp2 -o gen.cpp >?expected
+:   && diff ./expect.cpp ./gen.cpp
+:   && cxx ./gen.cpp1
 :
 : When there is an expected output file, then this test does the following:
 : 1.  Run cppfront with input .cpp2 file.

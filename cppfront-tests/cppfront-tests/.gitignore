@@ -1,5 +1,5 @@
-cppfront-tests
+example
 
 # Testscript output directory (can be symlink).
 #
-test-cppfront-tests
+test-example

@@ -17,7 +17,7 @@ cppfront_stdout{*.cpp2}: extension = output
 
 ./: libue{cpp2-meta}: $libs
 
-for t: regression-tests/cpp2{pure2-* -gcc* -clang* -apple* -msvc*}
+for t: regression-tests/cpp2{pure2-*}
 {
   n = $name($t)
 
@@ -39,12 +39,19 @@ for t: regression-tests/cpp2{pure2-* -gcc* -clang* -apple* -msvc*}
     cp --no-cleanup $in $out
     sed -i -e "s|\(^.*lib_poptions =\)|\1 [strings] $regex.merge($lib_poptions, '\(.*\)', '\1', ' ')|" $out
     sed -i -e "s|\(^.*lib_libs =\)|\1 [strings] $regex.merge($lib_libs, '\(.*\)', '\1', ' ')|" $out
+
+    # all generated files must have an up-to-date modification time.
+    touch --after $in $out
+    for i: $integer_sequence(1, $size($>))
+      touch --after $in $path($>[$i])
+    end
   }}
 
-  # disable so that it doesn't try to run testscript + testscript{pure2} as a test
+  # disable so that it doesn't try to run testscript + testscript{pure2} as a test.
   testscript{$n}: test = false
 }
 
+# see upstream/**/build-cppfront.yaml or run-tests.sh.
 if ($cxx.target.system == 'win32-msvc')
 {
   cxx.coptions += -nologo -EHsc

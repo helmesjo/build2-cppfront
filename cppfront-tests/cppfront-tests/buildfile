@@ -28,7 +28,7 @@ hxx{dummy}@./:
   out_cpp      = [path]   "$out_dir/$name($>[0]).$ext_cxx"
   # Can't run '-pure' unless we use extensions 'h=hxx' 'cpp=cxx'
   # because cppfront hardcode these in a bunch for places.
-  cppfront_cmd = [cmdline] $cppfront -include-std -clean
+  cppfront_cmd = [cmdline] $cppfront -include-std
   # There is currently no way to specify generated file extensions,
   # so we assume cppfront outputs `(cpp2_in).h|cpp` and keep track.
   cpp2_files   = [paths]
@@ -55,7 +55,7 @@ hxx{dummy}@./:
   dep = $out_dir/$name($out_dir).d
   depdb dyndep --dyn-target $depyndep_options --format lines --file $dep -- \
     mkdir -p $tmp                                     && \
-    $cppfront_cmd                                        \
+    $cppfront_cmd -clean                                 \
       -cwd "$tmp"                                        \
       -output stdout                                     \
       $path.relative($cpp2_files, [dir_path] $tmp)       \

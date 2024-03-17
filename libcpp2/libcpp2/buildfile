@@ -8,11 +8,18 @@ lib{cpp2}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
 #
 cxx.poptions =+ "-I$src_root"
 
+if $config.libcpp2.import_std
+{
+  cxx.poptions = -DCPP2_IMPORT_STD
+  cxx.export.poptions = -DCPP2_IMPORT_STD
+}
+
 # Export options.
 #
 lib{cpp2}:
 {
-  cxx.export.poptions = "-I$path.posix_representation($src_base)"
+  libcpp2.import_std = [bool] $config.libcpp2.import_std
+  cxx.export.poptions += "-I$path.posix_representation($src_base)"
   cxx.export.libs = $intf_libs
 }
 

@@ -1,5 +1,4 @@
-libs =
-import libs += libcpp2%lib{cpp2}
+import libcpp2 = libcpp2%lib{cpp2}
 import! cppfront = cppfront%exe{cppfront}
 
 define [see_through] cxx2: group
@@ -12,7 +11,7 @@ define hpp2: file
 hpp2{*}: extension = h2
 
 ./: cxx2{example}: cpp2{*} hpp2{*}
-./: exe{example}: {cxx2}{example} $libs testscript
+./: exe{example}: {cxx2}{example} $libcpp2 testscript
 
 cxx.poptions =+ "-I$out_root" "-I$src_root"
 
@@ -28,20 +27,21 @@ hxx{dummy}@./:
   out_cpp      = [path]   "$out_dir/$name($>[0]).$ext_cxx"
   # Can't run '-pure' unless we use extensions 'h=hxx' 'cpp=cxx'
   # because cppfront hardcode these in a bunch for places.
-  cppfront_cmd = [cmdline] $cppfront -include-std
+  import_std = [bool] $($libcpp2: libcpp2.import_std)
+  cppfront_cmd = [cmdline] $cppfront -clean ($import_std ? -import-std : -include-std)
   # There is currently no way to specify generated file extensions,
   # so we assume cppfront outputs `(cpp2_in).h|cpp` and keep track.
-  cpp2_files   = [paths]
-  hpp1_files   = [paths]
-  cpp1_files   = [paths]
+  cpp2_files = [paths]
+  hpp1_files = [paths]
+  cpp1_files = [paths]
   for cpp2_in: $<
-    in_name =  [string]  $name($cpp2_in)
+    in_name = [string] $name($cpp2_in)
     if ($extension($cpp2_in) == 'h2')
-      cpp2_files += [paths]   $path($cpp2_in)
-      hpp1_files += [paths]   $name($cpp2_in).h
+      cpp2_files += [paths] $path($cpp2_in)
+      hpp1_files += [paths] $name($cpp2_in).h
     elif ($extension($cpp2_in) == 'cpp2')
-      cpp2_files += [paths]   $path($cpp2_in)
-      cpp1_files += [paths]   $name($cpp2_in).cpp
+      cpp2_files += [paths] $path($cpp2_in)
+      cpp1_files += [paths] $name($cpp2_in).cpp
     end
   end
 
@@ -55,7 +55,7 @@ hxx{dummy}@./:
   dep = $out_dir/$name($out_dir).d
   depdb dyndep --dyn-target $depyndep_options --format lines --file $dep -- \
     mkdir -p $tmp                                     && \
-    $cppfront_cmd -clean                                 \
+    $cppfront_cmd                                        \
       -cwd "$tmp"                                        \
       -output stdout                                     \
       $path.relative($cpp2_files, [dir_path] $tmp)       \

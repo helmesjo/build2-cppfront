@@ -4,6 +4,8 @@
 
 cxx.std = experimental
 
+config [bool] config.libcpp2.import_std ?= false
+
 using cxx
 
 hxx{*}: extension = h

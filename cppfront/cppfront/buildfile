@@ -1,6 +1,5 @@
-libs =
-#import libs += libhello%lib{hello}
+import libcpp2 = libcpp2%lib{cpp2}
 
-exe{cppfront}: source/{hxx ixx txx cxx}{**} $libs testscript
+exe{cppfront}: source/{hxx ixx txx cxx}{**} $libcpp2 testscript
 
 cxx.poptions =+ "-I$src_base/include"

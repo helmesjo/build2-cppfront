@@ -1,5 +1,4 @@
-libs =
-import! [rule_hint=cxx.link] libs = libcpp2%lib{cpp2}
+import! [rule_hint=cxx.link] libcpp2 = libcpp2%lib{cpp2}
 import cppfront = cppfront%exe{cppfront}
 
 define [see_through] cpp2_cxx: group
@@ -15,7 +14,7 @@ cpp2_out{*}: extension = cpp
 define cppfront_stdout: file
 cppfront_stdout{*.cpp2}: extension = output
 
-./: libue{cpp2-meta}: $libs
+./: libue{cpp2-meta}: $libcpp2
 
 for t: regression-tests/cpp2{pure2-*}
 {
@@ -24,6 +23,7 @@ for t: regression-tests/cpp2{pure2-*}
   ./: alias{$n}: $t testscript{$n} $cppfront
   {
     cpp2_in = $t
+    import_std = [bool] $($libcpp2: libcpp2.import_std)
   }
 
   testscript{$n}: testscript{pure2} libue{cpp2-meta}

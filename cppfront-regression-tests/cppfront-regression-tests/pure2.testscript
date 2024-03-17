@@ -45,7 +45,7 @@ if (!$empty($filesystem.path_search($expected_cpp, $results_dir)))
   # TODO: use -import-std.
   +$cppfront \
     -pure \
-    -include-std \
+    ($import_std ? -import-std : -include-std) \
     ./in.cpp2 \
     -output ./$generated_cpp \
     &?$~/*** \
@@ -92,7 +92,7 @@ elif (!$empty($filesystem.path_search($expected_cppfront_output, $results_dir)))
   # TODO: use -import-std.
   +$cppfront \
     -pure \
-    -include-std \
+    ($import_std ? -import-std : -include-std) \
     ./in.cpp2 \
     &?$~/*** \
     2>&1 >=./$cppfront_output != 0

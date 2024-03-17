@@ -11,4 +11,4 @@ email: helmesjo@gmail.com
 #build-error-email: helmesjo@gmail.com
 depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
-#depends: libhello ^1.0.0
+depends: libcpp2

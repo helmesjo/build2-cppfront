@@ -1,14 +1,14 @@
 : 1
-name: cppfront
+name: cppfront-tests
 version: 0.1.0-a.0.z
 language: c++
-summary: cppfront C++ executable
+project: build2-cppfront
+summary: cppfront-tests C++ executable
 license: other: proprietary ; Not free/open source.
 description-file: README.md
-url: https://example.org/cppfront
+url: https://example.org/build2-cppfront
 email: helmesjo@gmail.com
 #build-error-email: helmesjo@gmail.com
 depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
-tests: cppfront-tests == $
-tests: cppfront-regression-tests == $
+#depends: libhello ^1.0.0

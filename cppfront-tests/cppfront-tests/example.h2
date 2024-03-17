@@ -1,0 +1,12 @@
+name: (move s: std::string) -> std::string = {
+    if(s.empty())
+    {
+        s = "world";
+    }
+    decorate(s);
+    return s;
+}
+
+decorate: (inout s: std::string) = {
+    s = "[" + s + "]";
+}

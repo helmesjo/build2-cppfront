@@ -49,29 +49,3 @@ if ($cxx.target.system == 'win32-msvc')
 {
   cxx.coptions += -nologo -EHsc
 }
-
-# Note also that this rule has no problem compiling multiple .thrift files
-# into the same gen-cpp/ subdirectory provided they don't clobber each other's
-# generated files.
-#
-# [rule_name=cpp2_to_cpp1] cpp2_cxx{~'/(.+)/'}: cpp2{~'/\1/'} $cppfront
-# {{
-#    o = $directory($>[0])             # Target output directory.
-#    s = $path($<[0])                  # Source file in.
-#    so = $o/$name($s).cpp                  # Source file out.
-#    d = $o/$name($<[0]).d             # Dep file (target list).
-
-#    cppfront_options = -pure -output $so $s
-
-#    dyndep_options = --target-what 'generated cpp2 -> cpp1'
-#    dyndep_options += --target-extension-type h=hxx
-#    dyndep_options += --target-extension-type cpp=cxx
-
-#    depdb dyndep --dyn-target $dyndep_options --format lines --file $d -- \
-#      $cppfront $cppfront_options                && \
-#      find $o -type f -name "*.h"    >$d         && \
-#      find $o -type f -name "*.cpp"  >>$d
-
-#    diag cppfront $<
-#    $cppfront $cppfront_options
-# }}

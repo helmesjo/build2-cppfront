@@ -10,7 +10,7 @@ cpp2{*}: extension = cpp2
 define hpp2: file
 hpp2{*}: extension = h2
 
-./: cxx2{example}: cpp2{*} hpp2{*}
+./: cxx2{example}: cpp2{**} hpp2{**}
 ./: exe{example}: {cxx2}{example} $libcpp2 testscript
 
 cxx.poptions =+ "-I$out_root" "-I$src_root"
@@ -25,23 +25,20 @@ hxx{dummy}@./:
   ext_cxx = $(cxx{dummy}@./: extension)
   ext_hxx = $(hxx{dummy}@./: extension)
   out_cpp      = [path]   "$out_dir/$name($>[0]).$ext_cxx"
-  # Can't run '-pure' unless we use extensions 'h=hxx' 'cpp=cxx'
-  # because cppfront hardcode these in a bunch for places.
-  import_std = [bool] $($libcpp2: libcpp2.import_std)
-  cppfront_cmd = [cmdline] $cppfront -clean ($import_std ? -import-std : -include-std)
+
   # There is currently no way to specify generated file extensions,
   # so we assume cppfront outputs `(cpp2_in).h|cpp` and keep track.
   cpp2_files = [paths]
-  hpp1_files = [paths]
   cpp1_files = [paths]
   for cpp2_in: $<
-    in_name = [string] $name($cpp2_in)
-    if ($extension($cpp2_in) == 'h2')
+    ext = $extension($cpp2_in)
+    rel = [path] $path.relative($path.base($path($cpp2_in)), $src_base)
+    if ($ext == 'h2')
       cpp2_files += [paths] $path($cpp2_in)
-      hpp1_files += [paths] $name($cpp2_in).h
-    elif ($extension($cpp2_in) == 'cpp2')
+      cpp1_files += [paths] $out_base/$(rel).$ext_hxx
+    elif ($ext == 'cpp2')
       cpp2_files += [paths] $path($cpp2_in)
-      cpp1_files += [paths] $name($cpp2_in).cpp
+      cpp1_files += [paths] $out_base/$(rel).$ext_cxx
     end
   end
 
@@ -51,36 +48,34 @@ hxx{dummy}@./:
   dyndep_options += --target-extension-type cpp=cxx
 
   # 1. Feed `depdb` which targets cppfront will generate
-  tmp = $out_dir/$name($out_dir).cpp2
   dep = $out_dir/$name($out_dir).d
+  # Can't run '-pure' unless we use extensions 'h=hxx' 'cpp=cxx'
+  # because cppfront hardcode these in a bunch for places.
+  import_std   = [bool]    $($libcpp2: libcpp2.import_std)
+  cppfront_cmd = [cmdline] $cppfront -quiet -clean ($import_std ? -import-std : -include-std)
+  files_cmd    = [cmdline] echo $cpp1_files | sed -e "'s/\($ext_cxx|$ext_hxx\) /\1\n/g'"
   depdb dyndep --dyn-target $depyndep_options --format lines --file $dep -- \
-    mkdir -p $tmp                                     && \
-    $cppfront_cmd                                        \
-      -cwd "$tmp"                                        \
-      -output stdout                                     \
-      $path.relative($cpp2_files, [dir_path] $tmp)       \
-           >!                                            \
-                                                      && \
-    find $tmp -type f                          > $dep && \
-    sed -e "s|[/\\\\]$tmp||g"                 -i $dep && \
-    sed -e "s|\.cpp^|.$ext_cxx|g"             -i $dep && \
-    sed -e "s|\.h^|.$ext_hxx|g"               -i $dep && \
-    echo ''                                    >>$dep && \
-    echo $path.representation([dir_path] $tmp) >>$dep && \
-    cat $dep
+    $files_cmd >$dep &!$dep
 
   # 2. Generate source files.
-  diag cppfront $>
-  $cppfront_cmd \
-    -cwd $out_dir \
-    $path.relative($cpp2_files, $out_dir) \
-    1>- 2>-
+  diag cppfront $<
 
-  # Rename to expected file extensions.
-  for hpp1: $hpp1_files
-    mv --no-cleanup "$out_dir/$hpp1" "$out_dir/$name($hpp1).$ext_hxx"
+  i = [uint64] 0
+  n = $size($cpp2_files)
+  while ($i != $n)
+    cpp2 = [path] ($cpp2_files[$i])
+    cpp1 = [path] ($cpp1_files[$i])
+    dir = [dir_path] $path.directory($cpp1)
+    mkdir -p  $dir &!$dir
+    $cppfront_cmd -output $cpp1 $cpp2
+    i += 1
   end
-  for cpp1: $cpp1_files
-    mv --no-cleanup "$out_dir/$cpp1" "$out_dir/$name($cpp1).$ext_cxx"
-  end
+
+  # # Rename to expected file extensions.
+  # for hpp1: $hpp1_files
+  #   mv --no-cleanup "$out_dir/$hpp1" "$out_dir/$name($hpp1).$ext_hxx"
+  # end
+  # for cpp1: $cpp1_files
+  #   mv --no-cleanup "$out_dir/$cpp1" "$out_dir/$name($cpp1).$ext_cxx"
+  # end
 }}

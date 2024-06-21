@@ -1,6 +1,6 @@
 : basics
 :
-$* 'World' >'Hello [World]'
+$* 'World' >'Hello [World] - appended this'
 
 : missing-name
 :

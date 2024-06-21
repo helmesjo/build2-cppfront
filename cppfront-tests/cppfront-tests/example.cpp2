@@ -1,9 +1,10 @@
-#include "example.hxx"
+#include <cppfront-tests/subdir/example.hxx>
+#include <cppfront-tests/subdir/xyz-hej/header.hxx>
 
 main: (args) -> int = {
     if(args.size() > 1u)
     {
-        std::cout << "Hello (name(args[1] as std::string))$\n";
+        std::cout << "Hello (append(name(args[1] as std::string)))$\n";
     }
     else
     {
